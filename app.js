@@ -5,7 +5,6 @@ let seletedMatch;
 
 const matchesReducer = (state = initialState, action) => {
   if (action.type === "increment") {
-    console.log({ action, currentState: state });
     const { matchId, incrementBy } = action.payload;
     const match = state.find((match) => match.id === matchId);
     const newState = state.slice();
@@ -14,7 +13,6 @@ const matchesReducer = (state = initialState, action) => {
     newState[index] = updateMatch;
     return newState;
   } else if (action.type === "decrement") {
-    // console.log({ action, currentState: state });
     const { matchId, decrementBy } = action.payload;
     const match = state.find((match) => match.id === matchId);
     const newState = state.slice();
@@ -34,10 +32,8 @@ const matchesReducer = (state = initialState, action) => {
     });
   } else if (action.type === "remove_match") {
     const copyState = state.slice();
-    const newState = copyState.filter(m => m.id !== action.payload);
+    const newState = copyState.filter((m) => m.id !== action.payload);
     return newState;
-
-    // return newState.splice(action.payload, 1);
   } else {
     return state;
   }
@@ -47,12 +43,12 @@ const store = Redux.createStore(matchesReducer);
 
 store.dispatch({
   type: "addMatch",
-  payload: { id: 1, increment: 0, decrement: 0, total: 0 },
+  payload: { id: 1, total: 0 },
 });
 
 store.subscribe(() => {
-  const s = store.getState();
-  console.log({ s });
+  const state = store.getState();
+//   console.log({ state });
 });
 
 const allMatchesContainer = document.querySelector(".all-matches.container");
@@ -73,34 +69,35 @@ allMatchesContainer.addEventListener("click", function (event) {
   }
 });
 
-
 //Delete Button handler
 handleDeleteButton = (event) => {
-    
-    const matchSection = event.target.closest(".match");
-    clearHandleDeleteButtonListeners();
-    store.dispatch({type: 'remove_match', payload: Number(matchSection.getAttribute("matchId"))});
-    const match = document.querySelector(`div[matchId='${Number(matchSection.getAttribute("matchId"))}']`);
-    match.remove();
-    addHandleDeleteButtonListeners();
+  const matchSection = event.target.closest(".match");
+  clearHandleDeleteButtonListeners();
+  store.dispatch({
+    type: "remove_match",
+    payload: Number(matchSection.getAttribute("matchId")),
+  });
+  const match = document.querySelector(
+    `div[matchId='${Number(matchSection.getAttribute("matchId"))}']`
+  );
+  match.remove();
+  addHandleDeleteButtonListeners();
 };
 
 function clearHandleDeleteButtonListeners() {
-    const deleteButtons = document.querySelectorAll(".lws-delete");
-    deleteButtons.forEach(button => {
-        button.removeEventListener('click', handleDeleteButton)
-    })
+  const deleteButtons = document.querySelectorAll(".lws-delete");
+  deleteButtons.forEach((button) => {
+    button.removeEventListener("click", handleDeleteButton);
+  });
 }
 
 function addHandleDeleteButtonListeners() {
-    const deleteButtons = document.querySelectorAll(".lws-delete");
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", handleDeleteButton);
-    });
+  const deleteButtons = document.querySelectorAll(".lws-delete");
+  deleteButtons.forEach((button) => {
+    button.addEventListener("click", handleDeleteButton);
+  });
 }
 addHandleDeleteButtonListeners();
-
-
 
 const addMatchBtn = document.querySelector(".lws-addMatch");
 const matchesContainer = document.querySelector(".all-matches");
@@ -139,7 +136,6 @@ const incrementInputs = document.querySelectorAll(".lws-increment");
 const decrementInputs = document.querySelectorAll(".lws-decrement");
 const resetBtn = document.querySelector(".lws-reset");
 
-
 function resetUI() {
   store.dispatch({ type: "reset" });
   const container = document.querySelector(".all-matches");
@@ -157,81 +153,12 @@ function renderUI(store, selectedMatchId) {
   if (seletedMatch && match) {
     const result = seletedMatch.querySelector(".lws-singleResult");
     result.innerText = match.total;
-    console.log({ a: seletedMatch });
   }
 }
 
-function addListenerForAllInputsField(store) {
-  const incrementInputs = document.querySelectorAll(".lws-increment");
-  const decrementInputs = document.querySelectorAll(".lws-decrement");
-  const deleteButtons = document.querySelectorAll(".lws-delete");
-
-  //   deleteButtons.forEach((btn, ind) => {
-  //     btn.addEventListener("click", () => deleteEvent(btn, ind));
-  //   });
-
-  incrementInputs.forEach((input, indx) => {
-    renderUI(store, indx);
-
-    input.addEventListener("keydown", (e) => {
-      if (e.keyCode === 13) {
-        e.preventDefault();
-        store.dispatch({
-          type: "increment",
-          payload: {
-            matchId: selectedMatchId,
-            incrementBy: Number(e.target.value),
-          },
-        });
-
-        renderUI(store, indx);
-
-        // const state = store.getState();
-        // const match = state.find((match) => match.id === indx + 1);
-        // const container = document.querySelector(".all-matches");
-        // container.children[indx].childNodes[5].innerHTML = match.total;
-        // console.log({container})
-        // console.log({indx});
-        // console.log(match);
-        // container.childNodes[3].childNodes[5].childNodes[1].innerHTML = match.total;
-        // const nextInput = document.querySelectorAll(".lws-decrement")[indx];
-        // nextInput.focus();
-
-        // console.log({ matchId, event: e, index: indx });
-      }
-    });
-  });
-
-  decrementInputs.forEach((input, indx) => {
-    input.addEventListener("keydown", (e) => {
-      if (e.keyCode === 13) {
-        // handle Enter key pressed for increment input field
-        e.preventDefault(); // prevent form submission
-        store.dispatch({
-          type: "decrement",
-          payload: {
-            matchId: selectedMatchId,
-            decrementBy: Number(e.target.value),
-          },
-        });
-        renderUI(store, indx);
-        // const container = document.querySelector(".all-matches");
-        // const state = store.getState();
-        // const match = state.find((match) => match.id === indx + 1);
-        // container.childNodes[3].childNodes[5].childNodes[1].innerHTML = match.total;
-        // const incrementValue = parseInt(e.target.value);
-        // dispatch increment action with matchId and incrementValue
-      }
-    });
-  });
-}
-// addListenerForAllInputsField(store);
-
 function addButtonListener(store) {
-    
-    
-    addMatchBtn.addEventListener("click", () => {
-      clearHandleDeleteButtonListeners();
+  addMatchBtn.addEventListener("click", () => {
+    clearHandleDeleteButtonListeners();
     const matchesContainer = document.querySelector(".all-matches");
 
     const newMatch = document.createElement("div");
@@ -260,55 +187,18 @@ function addButtonListener(store) {
       `;
     matchesContainer.appendChild(newMatch);
     addHandleDeleteButtonListeners();
-    const matches = document.querySelectorAll(".match");
-    for (let i = 0; i < matches.length; i++) {
-      console.log(matches[i].getAttribute("matchId"));
-    }
-    console.log(document.querySelectorAll(".match"));
-
-    // const matchesContainer = document.querySelector(".all-matches");
-    console.log({
-      matchLength: matchesContainer.children.length,
-      matchesContainer,
-    });
     const state = store.getState();
     store.dispatch({
       type: "addMatch",
-      payload: { id: matchId, increment: 0, decrement: 0, total: 0 },
+      payload: { id: matchId, total: 0 },
     });
     addEventListenersForNewMatch(state.length);
-    // console.log(matchesContainer?.children.length);
-    // initialState.push({
-    //   id: matchesContainer?.children.length,
-    //   increment: 0,
-    //   decrement: 0,
-    //   total: 0,
-    // });
-    // console.log({ initialState });
-    // console.log('add button store', store)
-    // addListenerForAllInputsField(store);
   });
 }
-
-// function removeBtn() {
-
-// }
 
 function addEventListenersForNewMatch(index) {
   const incrementInputs = document.querySelectorAll(".lws-increment");
   const decrementInputs = document.querySelectorAll(".lws-decrement");
-  const state = store.getState();
-  const deleteButtons = document.querySelectorAll(".lws-delete");
-
-  //   function removeBtn() {
-  //     deleteEvent(deleteButtons[index], index);
-  //   }
-  // console.log('watch dbtins', {deleteButtons, index})
-  //   deleteButtons[index].addEventListener("click", removeBtn);
-//   if (sele)
-//     seletedMatch.querySelector("click", (event) => {
-//       console.log("event", event);
-//     });
 
   incrementInputs[index].addEventListener("keydown", (e) => {
     if (e.keyCode === 13) {
@@ -320,12 +210,7 @@ function addEventListenersForNewMatch(index) {
           incrementBy: Number(e.target.value),
         },
       });
-
       renderUI(store, selectedMatchId);
-
-      const container = document.querySelector(".all-matches");
-      //   console.log({ container });
-      //   console.log({ index });
     }
   });
 
@@ -343,13 +228,8 @@ function addEventListenersForNewMatch(index) {
       renderUI(store, selectedMatchId);
     }
   });
-
-  //   console.log({ input: incrementInputs, index });
 }
-// addButtonListener(store);
-
 function appInit(store) {
-  //   addListenerForAllInputsField(store);
   addButtonListener(store);
 }
 
