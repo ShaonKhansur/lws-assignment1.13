@@ -142,6 +142,10 @@ function resetUI() {
   const containers = container.getElementsByClassName("match");
   for (let i = 0; i < containers.length; i++) {
     containers[i].childNodes[5].childNodes[1].innerText = 0;
+    const increment  = containers[i].getElementsByClassName('lws-increment')
+    increment[0].value = 0;
+    const decrement  = containers[i].getElementsByClassName('lws-decrement')
+    decrement[0].value = 0;
   }
 }
 resetUI();
@@ -186,6 +190,7 @@ function addButtonListener(store) {
         </div>
       `;
     matchesContainer.appendChild(newMatch);
+    resetUI()
     addHandleDeleteButtonListeners();
     const state = store.getState();
     store.dispatch({
