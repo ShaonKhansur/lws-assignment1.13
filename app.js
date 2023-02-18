@@ -1,5 +1,7 @@
 const initialState = [];
 let matchId = 1;
+let selectedMatchId;
+let seletedMatch;
 
 const matchesReducer = (state = initialState, action) => {
   if (action.type === "increment") {
@@ -54,12 +56,68 @@ store.subscribe(() => {
   console.log({ s });
 });
 
+const allMatchesContainer = document.querySelector('.all-matches.container');
+const firstChild = allMatchesContainer.children[0];
+if (firstChild.nodeType === Node.ELEMENT_NODE) { 
+    firstChild.setAttribute("matchId", 1);
+}
+
+
+allMatchesContainer.addEventListener('click', function(event) {
+    const target = event.target;
+    if (target.closest('.match')) {
+      const seletedMatch = target.closest('.match');
+      console.log('seletedMatch', seletedMatch)
+    // seletedMatch = seletedMatch;
+    selectedMatchId = Number(seletedMatch.getAttribute('matchId'));
+
+    // console.log('section:',seletedMatch);
+      console.log('Selected match section:', seletedMatch);
+    }
+  });
+// allMatchesContainer.addEventListener('click', function(event) {
+//   const target = event.target;
+//   if (target.classList.contains('lws-increment') || target.classList.contains('lws-decrement') || target.classList.contains('lws-delete')) {
+//     seletedMatch = target.closest('.match');
+//     console.log('seletedMatch', seletedMatch)
+//     // seletedMatch = seletedMatch;
+//     selectedMatchId = Number(seletedMatch.getAttribute('matchId'));
+
+//     console.log('section:',seletedMatch);
+//   }
+// });
+
 const addMatchBtn = document.querySelector(".lws-addMatch");
 const matchesContainer = document.querySelector(".all-matches");
-console.log({d: matchesContainer})
-const firstChild = matchesContainer.children[0];
+// const firstChild = matchesContainer.children[0];
 if (firstChild.nodeType === Node.ELEMENT_NODE) { // Check if the first child node is an element node
-    firstChild.setAttribute("matchId", 1); // Add the attribute to the first child element node
+    // firstChild.setAttribute("matchId", 1);
+    const increment = firstChild.querySelector('input.lws-increment');
+    increment.addEventListener('keydown', (e) => {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            store.dispatch({
+              type: "increment",
+              payload: { matchId: selectedMatchId, incrementBy: Number(e.target.value) },
+            });
+            renderUI(store, selectedMatchId);
+          }
+    })
+    console.log('increment F', increment)
+
+    const decrement = firstChild.querySelector('input.lws-decrement');
+    decrement.addEventListener('keydown', (e) => {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            store.dispatch({
+              type: "decrement",
+              payload: { matchId: selectedMatchId, decrementBy: Number(e.target.value) },
+            });
+            renderUI(store, selectedMatchId);
+          }
+    })
+    const deleteBtn = firstChild.querySelector('button.lws-delete');
+    // deleteBtn.addEventListener("click", () => deleteEvent(deleteBtn, 0));
   }
 const incrementInputs = document.querySelectorAll(".lws-increment");
 const decrementInputs = document.querySelectorAll(".lws-decrement");
@@ -67,12 +125,14 @@ const resetBtn = document.querySelector(".lws-reset");
 const deleteBtn = document.querySelector(".lws-delete");
 
 function deleteEvent(btn, index) {
-  // btn.removeEventListener('click',  deleteEvent)
-  const container = document.querySelector(".all-matches");
-  const matches = container.getElementsByClassName("match");
+    // btn.removeEventListener('click',  deleteEvent)
+    const container = document.querySelector(".all-matches");
+    const matches = container.getElementsByClassName("match");
+    // console.log({deletebtnind: index, btn, matches })
+
   //   console.log({ btn, index, matches });
   const dbtn = matches[index].getElementsByClassName("lws-delete");
-  matches[index].remove();
+//   matches[index].remove();
   //   console.log({index, state: store.getState()})
   store.dispatch({ type: "remove_match", payload: index });
 
@@ -93,11 +153,15 @@ function resetUI() {
 }
 resetBtn.addEventListener("click", resetUI);
 
-function renderUI(store, index) {
+function renderUI(store, selectedMatchId) {
   const state = store.getState();
-  const match = state.find((match) => match.id === index + 1);
-  const container = document.querySelector(".all-matches");
-  container.children[index].childNodes[5].childNodes[1].innerText = match.total;
+  const match = state.find(match => match.id === selectedMatchId)
+  if (seletedMatch && match) {
+      const result = seletedMatch.querySelector('.lws-singleResult');
+      result.innerText = match.total;
+      console.log({a: seletedMatch})
+
+  }
 }
 
 function addListenerForAllInputsField(store) {
@@ -117,7 +181,7 @@ function addListenerForAllInputsField(store) {
         e.preventDefault();
         store.dispatch({
           type: "increment",
-          payload: { matchId: indx + 1, incrementBy: Number(e.target.value) },
+          payload: { matchId: selectedMatchId, incrementBy: Number(e.target.value) },
         });
 
         renderUI(store, indx);
@@ -145,7 +209,7 @@ function addListenerForAllInputsField(store) {
         e.preventDefault(); // prevent form submission
         store.dispatch({
           type: "decrement",
-          payload: { matchId: indx + 1, decrementBy: Number(e.target.value) },
+          payload: { matchId: selectedMatchId, decrementBy: Number(e.target.value) },
         });
         renderUI(store, indx);
         // const container = document.querySelector(".all-matches");
@@ -243,12 +307,12 @@ function addEventListenersForNewMatch(index) {
       store.dispatch({
         type: "increment",
         payload: {
-          matchId: incrementInputs.length,
+          matchId: selectedMatchId,
           incrementBy: Number(e.target.value),
         },
       });
 
-      renderUI(store, index);
+      renderUI(store, selectedMatchId);
 
       const container = document.querySelector(".all-matches");
       //   console.log({ container });
@@ -262,12 +326,12 @@ function addEventListenersForNewMatch(index) {
       store.dispatch({
         type: "decrement",
         payload: {
-          matchId: decrementInputs.length,
+          matchId: selectedMatchId,
           decrementBy: Number(e.target.value),
         },
       });
 
-      renderUI(store, index);
+      renderUI(store, selectedMatchId);
     }
   });
 
@@ -276,7 +340,7 @@ function addEventListenersForNewMatch(index) {
 // addButtonListener(store);
 
 function appInit(store) {
-  addListenerForAllInputsField(store);
+//   addListenerForAllInputsField(store);
   addButtonListener(store);
 }
 
