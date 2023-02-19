@@ -190,7 +190,7 @@ function addButtonListener(store) {
         </div>
       `;
     matchesContainer.appendChild(newMatch);
-    resetUI()
+    // resetUI()
     addHandleDeleteButtonListeners();
     const state = store.getState();
     store.dispatch({
